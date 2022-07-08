@@ -1,0 +1,10 @@
+{
+  "basePackage": "com.bobocode.openapi",
+  "configPackage": "com.bobocode.openapi.config",
+  "apiPackage": "com.bobocode.openapi.controller",
+  "invokerPackage": "com.bobocode.openapi.api",
+  "modelPackage": "com.bobocode.openapi.dto",
+  "groupId": "com.bobocode",
+  "artifactId": "volunteer-openapi-client",
+  "modelNameSuffix": "Dto"
+}
