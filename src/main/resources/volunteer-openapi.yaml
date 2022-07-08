@@ -1,0 +1,222 @@
+openapi: 3.0.3
+info:
+  title: Volunteers Service
+  description: This service is dedicated to manage Volunteers organizations
+  contact:
+    name: Shtramak
+    url: https://www.example.com/support
+    email: shtramak@example.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/
+    description: local server
+  - url: https://example.com
+    description: production server
+
+paths:
+  /volunteers:
+    get:
+      operationId: allVolunteers
+      tags:
+        - Volunteer
+      description: 'returns all available volunteers'
+      responses:
+        '200':
+          description: A list of Volunteers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VolunteerFullInfo'
+    post:
+      operationId: createVolunteer
+      description: create volunteer
+      tags:
+        - Volunteer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Volunteer'
+      responses:
+        201:
+          description: UUID of created Volunteer
+          content:
+            application/json:
+              schema:
+                type: string
+                format: uuid
+
+  /volunteers/{name}:
+    get:
+      operationId: volunteerByName
+      description: returns Volunteer by name if exists
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: name of the Volunteer
+          schema:
+            type: string
+      tags:
+        - Volunteer
+      responses:
+        '200':
+          description: Volunteer by name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolunteerFullInfo'
+        '404':
+          description: Volunteer not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /volunteers/{name}/bankAccount:
+    post:
+      tags:
+        - Volunteer
+      operationId: createBankAccount
+      description: create bank account
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: name of the Volunteer
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BankAccount'
+      responses:
+        '201':
+          description: successful creation
+        '404':
+          description: Volunteer not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /volunteers/{name}/donate:
+    post:
+      operationId: donate
+      description: donate to volunteer bank account
+      tags:
+        - Volunteer
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: name of the Volunteer
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Donate'
+      responses:
+        '202':
+          description: donation accepted
+        '404':
+          description: Volunteer not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Volunteer:
+      type: object
+      description: Volunteer general info
+      properties:
+        name:
+          type: string
+          description: name of the volunteer
+          minLength: 2
+          maxLength: 50
+          example: Kossacks
+        address:
+          $ref: '#/components/schemas/Address'
+    VolunteerFullInfo:
+      type: object
+      description: Volunteer full info
+      properties:
+        name:
+          type: string
+          description: name of the volunteer
+          example: Volunteer name
+          minLength: 2
+          maxLength: 50
+        date_of_creation:
+          type: string
+          format: date
+          description: date of volunteer organization creation
+        address:
+          $ref: '#/components/schemas/Address'
+        bank_accounts:
+          type: array
+          description: array of Volunteer organization bank accounts
+          items:
+            $ref: '#/components/schemas/BankAccount'
+    Address:
+      type: object
+      description: Volunteer organization registration address
+      properties:
+        city:
+          type: string
+          description: city of registration
+          example: Ivano-Frankivsk
+        zip_code:
+          type: string
+          description: zip code of registration
+          example: 012345
+    BankAccount:
+      type: object
+      properties:
+        account_number:
+          type: string
+          description: bank account number
+          example: '0987654321'
+        bank_name:
+          type: string
+          description: bank account name
+          example: 'Ukrsibbank'
+    Donate:
+      type: object
+      description: Donation description
+      properties:
+        bank_name:
+          type: string
+          example: 'Ukrsibbank'
+        currency:
+          type: string
+          enum: [UAH, EUR, USD]
+          example: UAH
+        amount:
+          type: number
+          format: float
+          example: 10.0
+
+    ErrorResponse:
+      type: object
+      description: Error message
+      properties:
+        date_time:
+          type: string
+          format: date
+        message:
+          type: string
+          description: Error message
+          example: 'Volunteer Not found'
